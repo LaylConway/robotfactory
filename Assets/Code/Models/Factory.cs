@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Random = System.Random;
 
 namespace RobotFactory.Model
 {
@@ -18,14 +17,13 @@ namespace RobotFactory.Model
             Debug.Log(string.Format("Generating [{0}, {1}] world...", _width, _height));
 
             // Generate the map
-            var random = new Random();
             for (var x = 0; x < _width; x++)
             {
                 for (var y = 0; y < _height; y++)
                 {
                     _tiles[x, y] = new Tile
                     {
-                        Type = random.Next(0, 2) == 0 ? TileType.Grass : TileType.Floor
+                        Type = TileType.Grass
                     };
                 }
             }

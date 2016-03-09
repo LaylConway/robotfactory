@@ -1,6 +1,7 @@
 ﻿using System;
 using RobotFactory.Model;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace RobotFactory.Controllers
 {
@@ -11,6 +12,7 @@ namespace RobotFactory.Controllers
 
         private Factory _factory;
         private Vector3 _dragStartPos;
+        private bool _mouseInWorld;
 
         private void Start()
         {
@@ -37,10 +39,12 @@ namespace RobotFactory.Controllers
 
             // Find the actual position for the cast's result
             var currentPos = ray.GetPoint(dist);
+            _mouseInWorld = !FindObjectOfType<EventSystem>().IsPointerOverGameObject();
 
             UpdateDrag(currentPos);
             UpdateZoom();
-            UpdateCursor(currentPos);
+            UpdatePlace(currentPos);
+            UpdatePlacePreview(currentPos);
         }
 
         private void UpdateDrag(Vector3 currentPos)
@@ -60,11 +64,6 @@ namespace RobotFactory.Controllers
                 _dragStartPos = currentPos;
             }
 
-            if (Input.GetButtonUp("Place Tile"))
-            {
-                var tile = new Tile {Type = TileType.Wall};
-                _factory.SetTileAt(Vector2I.FloorFrom(currentPos), tile);
-            }
         }
 
         private void UpdateZoom()
@@ -76,12 +75,29 @@ namespace RobotFactory.Controllers
             _targetCamera.orthographicSize = zoom;
         }
 
-        private void UpdateCursor(Vector3 currentPos)
+        private void UpdatePlace(Vector3 currentPos)
         {
-            currentPos.x = Mathf.Floor(currentPos.x);
-            currentPos.y = 0.0f;
-            currentPos.z = Mathf.Floor(currentPos.z);
-            _tileSelector.transform.position = currentPos;
+            if (Input.GetButtonUp("Place Tile") && _mouseInWorld)
+            {
+                var tile = new Tile {Type = TileType.Wall};
+                _factory.SetTileAt(Vector2I.FloorFrom(currentPos), tile);
+            }
+        }
+
+        private void UpdatePlacePreview(Vector3 currentPos)
+        {
+            // TODO: Change this to use a view and a model
+            if (_mouseInWorld)
+            {
+                currentPos.x = Mathf.Floor(currentPos.x);
+                currentPos.y = 0.0f;
+                currentPos.z = Mathf.Floor(currentPos.z);
+                _tileSelector.transform.position = currentPos;
+            }
+            else
+            {
+                _tileSelector.transform.position = Vector3.zero;
+            }
         }
     }
 }
